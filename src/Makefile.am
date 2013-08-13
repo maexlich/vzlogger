@@ -33,6 +33,14 @@ vzlogger_SOURCES += \
 vzlogger_LDADD =
 vzlogger_LDFLAGS = -lpthread -lm -lstdc++ $(DEPS_VZ_LIBS)
 
+# Modbus support
+####################################################################
+if MODBUS_SUPPORT
+vzlogger_SOURCES += protocols/MeterModbus.cpp
+vzlogger_LDADD += $(DEPS_MODBUS_LIBS)
+AM_CPPFLAGS += $(DEPS_MODBUS_CFLAGS)
+endif
+
 # SML support
 ####################################################################
 if SML_SUPPORT

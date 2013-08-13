@@ -51,17 +51,23 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = vzlogger$(EXEEXT)
 
+# Modbus support
+####################################################################
+@MODBUS_SUPPORT_TRUE@am__append_1 = protocols/MeterModbus.cpp
+@MODBUS_SUPPORT_TRUE@am__append_2 = $(DEPS_MODBUS_LIBS)
+@MODBUS_SUPPORT_TRUE@am__append_3 = $(DEPS_MODBUS_CFLAGS)
+
 # SML support
 ####################################################################
-@SML_SUPPORT_TRUE@am__append_1 = protocols/MeterSML.cpp
-@SML_SUPPORT_TRUE@am__append_2 = $(DEPS_SML_LIBS)
-@SML_SUPPORT_TRUE@am__append_3 = $(DEPS_SML_CFLAGS)
+@SML_SUPPORT_TRUE@am__append_4 = protocols/MeterSML.cpp
+@SML_SUPPORT_TRUE@am__append_5 = $(DEPS_SML_LIBS)
+@SML_SUPPORT_TRUE@am__append_6 = $(DEPS_SML_CFLAGS)
 
 # local interface support
 ####################################################################
-@LOCAL_SUPPORT_TRUE@am__append_4 = local.cpp
-@LOCAL_SUPPORT_TRUE@am__append_5 = $(DEPS_LOCAL_LIBS)
-@LOCAL_SUPPORT_TRUE@am__append_6 = $(DEPS_LOCAL_CFLAGS)
+@LOCAL_SUPPORT_TRUE@am__append_7 = local.cpp
+@LOCAL_SUPPORT_TRUE@am__append_8 = $(DEPS_LOCAL_LIBS)
+@LOCAL_SUPPORT_TRUE@am__append_9 = $(DEPS_LOCAL_CFLAGS)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -82,9 +88,10 @@ am__vzlogger_SOURCES_DIST = vzlogger.cpp Channel.cpp \
 	protocols/MeterExec.cpp protocols/MeterRandom.cpp \
 	api/Volkszaehler.cpp api/MySmartGrid.cpp api/CurlIF.cpp \
 	api/CurlCallback.cpp api/CurlResponse.cpp \
-	protocols/MeterSML.cpp local.cpp
-@SML_SUPPORT_TRUE@am__objects_1 = MeterSML.$(OBJEXT)
-@LOCAL_SUPPORT_TRUE@am__objects_2 = local.$(OBJEXT)
+	protocols/MeterModbus.cpp protocols/MeterSML.cpp local.cpp
+@MODBUS_SUPPORT_TRUE@am__objects_1 = MeterModbus.$(OBJEXT)
+@SML_SUPPORT_TRUE@am__objects_2 = MeterSML.$(OBJEXT)
+@LOCAL_SUPPORT_TRUE@am__objects_3 = local.$(OBJEXT)
 am_vzlogger_OBJECTS = vzlogger.$(OBJEXT) Channel.$(OBJEXT) \
 	Config_Options.$(OBJEXT) threads.$(OBJEXT) Buffer.$(OBJEXT) \
 	Meter.$(OBJEXT) ltqnorm.$(OBJEXT) Obis.$(OBJEXT) \
@@ -94,12 +101,14 @@ am_vzlogger_OBJECTS = vzlogger.$(OBJEXT) Channel.$(OBJEXT) \
 	MeterExec.$(OBJEXT) MeterRandom.$(OBJEXT) \
 	Volkszaehler.$(OBJEXT) MySmartGrid.$(OBJEXT) CurlIF.$(OBJEXT) \
 	CurlCallback.$(OBJEXT) CurlResponse.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2)
+	$(am__objects_2) $(am__objects_3)
 vzlogger_OBJECTS = $(am_vzlogger_OBJECTS)
 am__DEPENDENCIES_1 =
-@SML_SUPPORT_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
-@LOCAL_SUPPORT_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
-vzlogger_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
+@MODBUS_SUPPORT_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
+@SML_SUPPORT_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
+@LOCAL_SUPPORT_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
+vzlogger_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 vzlogger_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(vzlogger_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -140,6 +149,8 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPS_LOCAL_CFLAGS = @DEPS_LOCAL_CFLAGS@
 DEPS_LOCAL_LIBS = @DEPS_LOCAL_LIBS@
+DEPS_MODBUS_CFLAGS = @DEPS_MODBUS_CFLAGS@
+DEPS_MODBUS_LIBS = @DEPS_MODBUS_LIBS@
 DEPS_SML_CFLAGS = @DEPS_SML_CFLAGS@
 DEPS_SML_LIBS = @DEPS_SML_LIBS@
 DEPS_VZ_CFLAGS = @DEPS_VZ_CFLAGS@
@@ -221,10 +232,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CFLAGS = -Wall -D_REENTRANT $(DEPS_VZ_CFLAGS) $(am__append_3) \
-	$(am__append_6)
+AM_CFLAGS = -Wall -D_REENTRANT $(DEPS_VZ_CFLAGS) $(am__append_6) \
+	$(am__append_9)
 #AM_CFLAGS = -Wall -D_REENTRANT  $(DEPS_VZ_CFLAGS)
-AM_CPPFLAGS = -I $(top_srcdir)/include -std=c++0x
+AM_CPPFLAGS = -I $(top_srcdir)/include -std=c++0x $(am__append_3)
 AM_LDFLAGS = 
 
 #vzlogger_SOURCES = test.cpp buffer.cpp reading.cpp obis.cpp exception.cpp
@@ -240,8 +251,8 @@ vzlogger_SOURCES = vzlogger.cpp Channel.cpp Config_Options.cpp \
 	protocols/MeterExec.cpp protocols/MeterRandom.cpp \
 	api/Volkszaehler.cpp api/MySmartGrid.cpp api/CurlIF.cpp \
 	api/CurlCallback.cpp api/CurlResponse.cpp $(am__append_1) \
-	$(am__append_4)
-vzlogger_LDADD = $(am__append_2) $(am__append_5)
+	$(am__append_4) $(am__append_7)
+vzlogger_LDADD = $(am__append_2) $(am__append_5) $(am__append_8)
 vzlogger_LDFLAGS = -lpthread -lm -lstdc++ $(DEPS_VZ_LIBS)
 all: all-am
 
@@ -339,6 +350,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterFluksoV2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterMap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterModbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterRandom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterS0.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MeterSML.Po@am__quote@
@@ -520,6 +532,20 @@ CurlResponse.obj: api/CurlResponse.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='api/CurlResponse.cpp' object='CurlResponse.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CurlResponse.obj `if test -f 'api/CurlResponse.cpp'; then $(CYGPATH_W) 'api/CurlResponse.cpp'; else $(CYGPATH_W) '$(srcdir)/api/CurlResponse.cpp'; fi`
+
+MeterModbus.o: protocols/MeterModbus.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MeterModbus.o -MD -MP -MF $(DEPDIR)/MeterModbus.Tpo -c -o MeterModbus.o `test -f 'protocols/MeterModbus.cpp' || echo '$(srcdir)/'`protocols/MeterModbus.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MeterModbus.Tpo $(DEPDIR)/MeterModbus.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocols/MeterModbus.cpp' object='MeterModbus.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MeterModbus.o `test -f 'protocols/MeterModbus.cpp' || echo '$(srcdir)/'`protocols/MeterModbus.cpp
+
+MeterModbus.obj: protocols/MeterModbus.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MeterModbus.obj -MD -MP -MF $(DEPDIR)/MeterModbus.Tpo -c -o MeterModbus.obj `if test -f 'protocols/MeterModbus.cpp'; then $(CYGPATH_W) 'protocols/MeterModbus.cpp'; else $(CYGPATH_W) '$(srcdir)/protocols/MeterModbus.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MeterModbus.Tpo $(DEPDIR)/MeterModbus.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='protocols/MeterModbus.cpp' object='MeterModbus.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MeterModbus.obj `if test -f 'protocols/MeterModbus.cpp'; then $(CYGPATH_W) 'protocols/MeterModbus.cpp'; else $(CYGPATH_W) '$(srcdir)/protocols/MeterModbus.cpp'; fi`
 
 MeterSML.o: protocols/MeterSML.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MeterSML.o -MD -MP -MF $(DEPDIR)/MeterSML.Tpo -c -o MeterSML.o `test -f 'protocols/MeterSML.cpp' || echo '$(srcdir)/'`protocols/MeterSML.cpp

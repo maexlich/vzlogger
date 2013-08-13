@@ -631,6 +631,10 @@ DEPS_LOCAL_LIBS
 DEPS_LOCAL_CFLAGS
 LOCAL_SUPPORT_FALSE
 LOCAL_SUPPORT_TRUE
+DEPS_MODBUS_LIBS
+DEPS_MODBUS_CFLAGS
+MODBUS_SUPPORT_FALSE
+MODBUS_SUPPORT_TRUE
 DEPS_SML_LIBS
 DEPS_SML_CFLAGS
 SML_SUPPORT_FALSE
@@ -734,6 +738,7 @@ ac_user_opts='
 enable_option_checking
 enable_dependency_tracking
 enable_sml
+enable_modbus
 enable_local
 with_reader
 enable_debug
@@ -757,6 +762,8 @@ DEPS_VZ_LIBS
 CPP
 DEPS_SML_CFLAGS
 DEPS_SML_LIBS
+DEPS_MODBUS_CFLAGS
+DEPS_MODBUS_LIBS
 DEPS_LOCAL_CFLAGS
 DEPS_LOCAL_LIBS'
 
@@ -1376,6 +1383,7 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-sml            enable support for smart messaging language (def=no)
+  --enable-modbus         enable support for modbus (def=yes)
   --enable-local          enable support for local HTTPd (def=yes)
   --enable-debug          enable debug data generation (def=no)
 
@@ -1408,6 +1416,10 @@ Some influential environment variables:
               C compiler flags for DEPS_SML, overriding pkg-config
   DEPS_SML_LIBS
               linker flags for DEPS_SML, overriding pkg-config
+  DEPS_MODBUS_CFLAGS
+              C compiler flags for DEPS_MODBUS, overriding pkg-config
+  DEPS_MODBUS_LIBS
+              linker flags for DEPS_MODBUS, overriding pkg-config
   DEPS_LOCAL_CFLAGS
               C compiler flags for DEPS_LOCAL, overriding pkg-config
   DEPS_LOCAL_LIBS
@@ -5442,6 +5454,121 @@ $as_echo "yes" >&6; }
 fi
 fi
 
+# Modbus support
+# Check whether --enable-modbus was given.
+if test "${enable_modbus+set}" = set; then :
+  enableval=$enable_modbus; modbus=$enableval
+else
+  modbus=yes
+
+fi
+
+
+ if test x"$modbus" = x"yes"; then
+  MODBUS_SUPPORT_TRUE=
+  MODBUS_SUPPORT_FALSE='#'
+else
+  MODBUS_SUPPORT_TRUE='#'
+  MODBUS_SUPPORT_FALSE=
+fi
+
+if test x"$modbus" = x"yes"; then
+
+$as_echo "#define MODBUS_SUPPORT /**/" >>confdefs.h
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DEPS_MODBUS" >&5
+$as_echo_n "checking for DEPS_MODBUS... " >&6; }
+
+if test -n "$DEPS_MODBUS_CFLAGS"; then
+    pkg_cv_DEPS_MODBUS_CFLAGS="$DEPS_MODBUS_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libmodbus >= 0.1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libmodbus >= 0.1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEPS_MODBUS_CFLAGS=`$PKG_CONFIG --cflags "libmodbus >= 0.1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$DEPS_MODBUS_LIBS"; then
+    pkg_cv_DEPS_MODBUS_LIBS="$DEPS_MODBUS_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libmodbus >= 0.1\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libmodbus >= 0.1") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEPS_MODBUS_LIBS=`$PKG_CONFIG --libs "libmodbus >= 0.1" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        DEPS_MODBUS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libmodbus >= 0.1" 2>&1`
+        else
+	        DEPS_MODBUS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libmodbus >= 0.1" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$DEPS_MODBUS_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libmodbus >= 0.1) were not met:
+
+$DEPS_MODBUS_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables DEPS_MODBUS_CFLAGS
+and DEPS_MODBUS_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables DEPS_MODBUS_CFLAGS
+and DEPS_MODBUS_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	DEPS_MODBUS_CFLAGS=$pkg_cv_DEPS_MODBUS_CFLAGS
+	DEPS_MODBUS_LIBS=$pkg_cv_DEPS_MODBUS_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+fi
+
 # local interface support
 # Check whether --enable-local was given.
 if test "${enable_local+set}" = set; then :
@@ -5726,6 +5853,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SML_SUPPORT_TRUE}" && test -z "${SML_SUPPORT_FALSE}"; then
   as_fn_error $? "conditional \"SML_SUPPORT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MODBUS_SUPPORT_TRUE}" && test -z "${MODBUS_SUPPORT_FALSE}"; then
+  as_fn_error $? "conditional \"MODBUS_SUPPORT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${LOCAL_SUPPORT_TRUE}" && test -z "${LOCAL_SUPPORT_FALSE}"; then

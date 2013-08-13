@@ -54,6 +54,20 @@ if test x"$sml" = x"yes"; then
     PKG_CHECK_MODULES([DEPS_SML], [sml >= 0.1])
 fi
 
+# Modbus support
+AC_ARG_ENABLE(
+    [modbus],
+    [AS_HELP_STRING([--enable-modbus], [enable support for modbus (def=yes)])],
+    [modbus=$enableval],
+    [modbus=yes]
+)
+
+AM_CONDITIONAL([MODBUS_SUPPORT], [test x"$modbus" = x"yes"])
+if test x"$modbus" = x"yes"; then
+    AC_DEFINE([MODBUS_SUPPORT], [], [MODBUS])
+    PKG_CHECK_MODULES([DEPS_MODBUS], [libmodbus >= 0.1])
+fi
+
 # local interface support
 AC_ARG_ENABLE(
     [local], 

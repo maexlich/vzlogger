@@ -36,7 +36,15 @@
 #include <protocols/MeterFluksoV2.hpp>
 #include <protocols/MeterRandom.hpp>
 #include <protocols/MeterS0.hpp>
+
+#ifdef SML_SUPPORT
 #include <protocols/MeterSML.hpp>
+#endif
+
+#ifdef MODBUS_SUPPORT
+#include <protocols/MeterModbus.hpp>
+#endif
+
 //#include <protocols/.h>
 
 #define METER_DETAIL(NAME, CLASSNAME, DESC, MAX_RDS, PERIODIC) {				\
@@ -56,6 +64,9 @@ static const meter_details_t protocols[] = {
 #ifdef SML_SUPPORT
 	METER_DETAIL(sml, Sml,"Smart Message Language as used by EDL-21, eHz and SyM²", 32,false),
 #endif /* SML_SUPPORT */
+#ifdef MODBUS_SUPPORT
+	METER_DETAIL(modbus, Modbus, "Modbus", 1, true),
+#endif
 //{} /* stop condition for iterator */
 	METER_DETAIL(none, NULL,NULL, 0,false),
 };
@@ -143,6 +154,12 @@ Meter::Meter(std::list<Option> pOptions) :
 				_protocol = vz::protocol::Protocol::Ptr(new MeterFluksoV2(pOptions));
 				_identifier = ReadingIdentifier::Ptr(new ChannelIdentifier());
 				break;
+#ifdef MODBUS_SUPPORT
+			case meter_protocol_modbus:
+				_protocol = vz::protocol::Protocol::Ptr(new MeterModbus(pOptions));
+				_identifier = ReadingIdentifier::Ptr(new NilIdentifier());
+				break;
+#endif
 			default:
 				break;
 	}
