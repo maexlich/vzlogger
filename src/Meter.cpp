@@ -133,10 +133,12 @@ Meter::Meter(std::list<Option> pOptions) :
 				_protocol = vz::protocol::Protocol::Ptr(new MeterD0(pOptions));
 				_identifier = ReadingIdentifier::Ptr(new ObisIdentifier());
 				break;
+#ifdef SML_SUPPORT
 			case  meter_protocol_sml:
 				_protocol = vz::protocol::Protocol::Ptr(new MeterSML(pOptions));
 				_identifier = ReadingIdentifier::Ptr(new ObisIdentifier());
 				break;
+#endif
 			case meter_protocol_fluksov2:
 				_protocol = vz::protocol::Protocol::Ptr(new MeterFluksoV2(pOptions));
 				_identifier = ReadingIdentifier::Ptr(new ChannelIdentifier());

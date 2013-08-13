@@ -10,14 +10,13 @@ bin_PROGRAMS = vzlogger
 
 vzlogger_SOURCES = vzlogger.cpp Channel.cpp Config_Options.cpp threads.cpp Buffer.cpp
 vzlogger_SOURCES += Meter.cpp ltqnorm.cpp Obis.cpp Options.cpp Reading.cpp
-vzlogger_SOURCES += exception.cpp local.cpp MeterMap.cpp
+vzlogger_SOURCES += exception.cpp MeterMap.cpp
 
 
 # Protocols (add your own here)
 vzlogger_SOURCES += \
 	protocols/MeterS0.cpp \
 	protocols/MeterD0.cpp \
-	protocols/MeterSML.cpp \
 	protocols/MeterFluksoV2.cpp \
 	protocols/MeterFile.cpp \
 	protocols/MeterExec.cpp \
@@ -37,7 +36,7 @@ vzlogger_LDFLAGS = -lpthread -lm -lstdc++ $(DEPS_VZ_LIBS)
 # SML support
 ####################################################################
 if SML_SUPPORT
-#vzlogger_SOURCES += protocols/sml.c
+vzlogger_SOURCES += protocols/MeterSML.cpp
 vzlogger_LDADD += $(DEPS_SML_LIBS)
 AM_CFLAGS += $(DEPS_SML_CFLAGS)
 endif
@@ -45,7 +44,7 @@ endif
 # local interface support
 ####################################################################
 if LOCAL_SUPPORT
-#vzlogger_SOURCES += local.c
+vzlogger_SOURCES += local.cpp
 vzlogger_LDADD += $(DEPS_LOCAL_LIBS)
 AM_CFLAGS += $(DEPS_LOCAL_CFLAGS)
 endif

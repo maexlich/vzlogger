@@ -43,9 +43,9 @@ AC_CHECK_FUNCS([gettimeofday memset sqrt strchr strtol])
 # SML support
 AC_ARG_ENABLE(
     [sml],
-    [AS_HELP_STRING([--enable-sml], [enable support for smart messaging language (def=yes)])],
+    [AS_HELP_STRING([--enable-sml], [enable support for smart messaging language (def=no)])],
     [sml=$enableval],
-    [sml=yes]
+    [sml=no]
 )
 
 AM_CONDITIONAL([SML_SUPPORT], [test x"$sml" = x"yes"])
