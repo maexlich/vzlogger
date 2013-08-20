@@ -117,10 +117,9 @@ int MeterModbus::open() {
 		print(log_error, "Unable to allocate libmodbus context: %s, %i", ip(), _port);
 		return ERR;
 	}
-	fprintf(stderr, "Baue Verbinding zu %s %i", _ip.c_str(), _port);
+	print(log_debug, "Connecting to %s:%i", name().c_str(), _ip.c_str(), _port);
 	if (modbus_connect(_mb) == -1) {
-		fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
-		//print(log_error, "Connection failed: %s", modbus_strerror(errno));
+		print(log_error, "Connection failed: %s",name().c_str(), modbus_strerror(errno));
 		modbus_free(_mb);
 		return ERR;
 	}
@@ -137,9 +136,13 @@ int MeterModbus::close() {
 
 ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	uint16_t in;
-	modbus_read_registers(_mb, _address, 1, &in);
+	int rc;
+	rc = modbus_read_registers(_mb, _address, 1, &in);
+	if (rc == -1) {
+	    print(log_error, "Unable to fetch data: %i %s",name().c_str(),errno, modbus_strerror(errno));
+	    return 0;
+	}
 	rds[0].value((double)in);
 	rds[0].time();
-	rds[0].identifier(new StringIdentifier("test"));
 	return 1;
 }
