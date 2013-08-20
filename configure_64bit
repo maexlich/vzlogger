@@ -1,0 +1,2 @@
+#! /bin/sh
+./configure --enable-modbus LIBS="-lpthread -lm -ljson -lcurl -lssl -lcrypto"
