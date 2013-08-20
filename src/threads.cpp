@@ -152,7 +152,7 @@ void * reading_thread(void *arg) {
 
 			if ((options.daemon() || options.local()) && details->periodic) {
 				print(log_info, "Next reading in %i seconds", mtr->name(), mtr->interval());
-//sleep(mtr->interval());
+				sleep(mtr->interval());
 			}
 		} while (options.daemon() || options.local() || options.logging() );
 	} catch(std::exception &e) {
