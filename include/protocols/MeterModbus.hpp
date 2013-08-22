@@ -50,7 +50,7 @@ public:
 	int _address;
 	int _length;
 	bool _input_read;
-	enum modbus_datatype _type;
+	bool _reset_connection;
 };
 
 #endif /* _FILE_H_ */

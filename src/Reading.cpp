@@ -246,6 +246,26 @@ size_t ChannelIdentifier::unparse(char *buffer, size_t n) {
 	return snprintf(buffer, n, "sensor%u/%s", abs(_channel) - 1, (_channel > 0) ? "power" : "consumption");
 }
 
+/* AddressIdentifier */
+bool AddressIdentifier::operator==(AddressIdentifier &cmp) {
+	return (_address == cmp._address);
+}
+
+void AddressIdentifier::parse(const char *string) {
+	int ret;
+	unsigned int address;
+	ret = scanf("address%u",&address);
+	if (ret != 1) {
+		throw vz::VZException("Failed to parse address identifier");
+	}
+	_address = address;
+
+}
+
+size_t AddressIdentifier::unparse(char *buffer, size_t n) {
+	return snprintf(buffer, n, "address%u", _address);
+}
+
 size_t NilIdentifier::unparse(char *buffer, size_t n) {
 	return snprintf(buffer, n, "NilItentifier");
 //buffer[0] = '\0';

@@ -71,7 +71,7 @@ public:
 	bool operator==(ObisIdentifier &cmp);
 	const std::string toString() {
 		std::ostringstream oss;
-		oss << "ObisItentifier:" << _obis.toString();
+		oss << "ObisIdentifier:" << _obis.toString();
 		return oss.str();
 	};
 
@@ -95,7 +95,7 @@ public:
 	bool operator==(StringIdentifier &cmp);
 	const std::string toString()  {
 		std::ostringstream oss;
-		oss << "StringItentifier:";
+		oss << "StringIdentifier:";
 		return oss.str();
 	};
 protected:
@@ -114,7 +114,7 @@ public:
 	bool operator==(ChannelIdentifier &cmp);
 	const std::string toString()  {
 		std::ostringstream oss;
-		oss << "ChannelItentifier:";
+		oss << "ChannelIdentifier:";
 		return oss.str();
 	};
 
@@ -129,10 +129,29 @@ public:
 	bool operator==(NilIdentifier &cmp);
 	const std::string toString()  {
 		std::ostringstream oss;
-		oss << "NilItentifier";
+		oss << "NilIdentifier";
 		return oss.str();
 	};
 private:
+};
+
+class AddressIdentifier : public ReadingIdentifier {
+
+public:
+	AddressIdentifier() {}
+	AddressIdentifier(unsigned int address) : _address(address) {}
+
+	void parse(const char *string);
+	size_t unparse(char *buffer, size_t n);
+	bool operator==(AddressIdentifier &cmp);
+	const std::string toString()  {
+		std::ostringstream oss;
+		oss << "AddressIdentifier:";
+		return oss.str();
+	};
+
+protected:
+	unsigned int _address;
 };
 
 class Reading {

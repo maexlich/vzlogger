@@ -33,13 +33,6 @@
 #include <VZException.hpp>
 #include <inttypes.h>
 
-#define DATA_BOOLEAN 0
-#define DATA_WORD 1
-#define DATA_SHORT 2
-#define DATA_DWORD 3
-#define DATA_LONG 4
-#define DATA_FLOAT 5
-
 
 
 
@@ -73,34 +66,11 @@ MeterModbus::MeterModbus(std::list<Option> options)
 		print(log_error, "Missing length or invalid type", name().c_str());
 		throw;
 	}
-	/* use  modbus_read_input_registers by default*/
+	/* use  modbus_read_registers by default*/
 	try {
 		_input_read = optlist.lookup_bool(options, "input_read");
 	} catch( vz::OptionNotFoundException &e ) {
 		_input_read = FALSE; /* use  modbus_read_registers by default*/
-	}
-	try {
-		std::string type = optlist.lookup_string(options, "type");
-		if(type == "bool")
-			datatype = BOOL;
-		else if( type == "word" )
-			datatype = WORD;
-		else if ( type == "short" )
-			datatype = SHORT;
-		else if ( type == "dword" )
-			datatype = DWORD;
-		else if ( type == "long" )
-			datatype = LONG;
-		else if ( type == "float" )
-			datatype = FLOAT;
-		else
-			throw vz::VZException(type+"is invalid");
-		
-		_type = datatype;
-		
-	} catch( vz::VZException &e ) {
-		print(log_error, "Missing type or invalid type", name().c_str());
-		throw;
 	}
 	
 	
@@ -123,7 +93,7 @@ int MeterModbus::open() {
 		modbus_free(_mb);
 		return ERR;
 	}
-
+	_reset_connection = false;
 	return SUCCESS;
 }
 
@@ -137,12 +107,16 @@ int MeterModbus::close() {
 ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	uint16_t in;
 	int rc;
-	rc = modbus_read_registers(_mb, _address, 1, &in);
+	
+	rc = modbus_read_registers(_mb, _address-1, 1, &in);
 	if (rc == -1) {
 	    print(log_error, "Unable to fetch data: %i %s",name().c_str(),errno, modbus_strerror(errno));
 	    return 0;
 	}
+	
+	
 	rds[0].value((double)in);
 	rds[0].time();
+	rds[0].identifier(new AddressIdentifier(_address));
 	return 1;
 }

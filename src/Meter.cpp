@@ -157,7 +157,7 @@ Meter::Meter(std::list<Option> pOptions) :
 #ifdef MODBUS_SUPPORT
 			case meter_protocol_modbus:
 				_protocol = vz::protocol::Protocol::Ptr(new MeterModbus(pOptions));
-				_identifier = ReadingIdentifier::Ptr(new NilIdentifier());
+				_identifier = ReadingIdentifier::Ptr(new AddressIdentifier());
 				break;
 #endif
 			default:
