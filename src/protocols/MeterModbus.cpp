@@ -108,9 +108,23 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	uint16_t in;
 	int rc;
 	
+	if(_reset_connection) {
+		int success;
+		print(log_info, "Resetting Connection to %s because of error", name().c_str(), _ip.c_str());
+		rc = open();
+		if(rc == SUCCESS)
+			_reset_connection = false;
+		else
+			return 0;
+	}
+	
 	rc = modbus_read_registers(_mb, _address-1, 1, &in);
 	if (rc == -1) {
-	    print(log_error, "Unable to fetch data: %i %s",name().c_str(),errno, modbus_strerror(errno));
+	    print(log_error, "Unable to fetch data: %i %s", name().c_str(), errno, modbus_strerror(errno));
+	    if(errno == 104 || errno == 32){
+			close();
+			_reset_connection = true;
+		}
 	    return 0;
 	}
 	
