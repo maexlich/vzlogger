@@ -41,17 +41,43 @@ Option::Option(const char *pKey, struct json_object *jso)
 		: _key(pKey)
 {
 //std::cout<< "New option...."<< pKey << std::endl;
-
+	int length;
+	void *mem_ptr;
+	struct addressparam *param_ptr;
 	switch (json_object_get_type(jso)) {
 			case json_type_string:	_value_string = json_object_get_string(jso);   break;
 			case json_type_int:	    value.integer = json_object_get_int(jso);     break;
 			case json_type_boolean:	value.boolean = json_object_get_boolean(jso); break;
 			case json_type_double:	value.floating = json_object_get_double(jso); break;
+			case json_type_array:
+			if(!strcmp(pKey, "addresses"))
+			{
+				length = json_object_array_length(jso);
+				mem_ptr = malloc(sizeof(struct addressparam )*(length+1));
+				memset((void *)mem_ptr, 0, sizeof(struct addressparam)*(length+1));
+				param_ptr = (struct addressparam *)mem_ptr;
+				for(int i = 0; i< length; i++){
+					struct json_object *cur_val;
+					cur_val = json_object_array_get_idx(jso, i);
+					param_ptr->function_code = (unsigned char)json_object_get_int(json_object_array_get_idx(cur_val,0));
+					param_ptr->address = json_object_get_int(json_object_array_get_idx(cur_val,1));
+					param_ptr->recalc_str = json_object_get_string(json_object_array_get_idx(cur_val,2));
+					print(log_debug, "Added Function Code: %u, Address: %u, Recalc: %s", "Options", param_ptr->function_code, param_ptr->address, param_ptr->recalc_str);
+					param_ptr++;
+				}
+				param_ptr->function_code = 0xFF;
+				value.addressparams = (struct addressparam *)mem_ptr;
+				break;
+			}
+			
 			default:		throw vz::VZException("Not a valid Type");
 	}
 
 	_type = (type_t)json_object_get_type(jso);
 }
+
+
+
 
 Option::Option(const char *pKey, char *pValue)
 		: _key(pKey)
@@ -87,6 +113,8 @@ Option::Option(const char *pKey, bool pValue)
 }
 
 Option::~Option() {
+	/*if (_type == type_array)
+		free((void *)value.addressparams);*/
 //	if (_key != NULL) {
 //		free(_key);
 //	}
@@ -95,6 +123,13 @@ Option::~Option() {
 	//	free((void*)(value.string));
 	//}
 }
+
+Option::operator struct addressparam *() const {
+	if (_type != type_array) throw vz::InvalidTypeException("Invalid type");
+
+	return value.addressparams;
+}
+
 
 Option::operator const char *() const {
 	if (_type != type_string) throw vz::InvalidTypeException("not a string");
@@ -153,6 +188,13 @@ const double OptionList::lookup_double(std::list<Option> options, const char *ke
 {
 	Option opt = lookup(options, key);
 	return (double)opt;
+}
+
+
+const struct addressparam *OptionList::lookup_addressparams(std::list<Option> options, const char *key)
+{
+	Option opt = lookup(options, key);
+	return (struct addressparam *)opt;
 }
 
 void OptionList::dump(std::list<Option> options) {

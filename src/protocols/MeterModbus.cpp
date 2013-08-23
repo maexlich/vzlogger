@@ -29,7 +29,6 @@
 #include <errno.h>
 
 #include "protocols/MeterModbus.hpp"
-#include "Options.hpp"
 #include <VZException.hpp>
 #include <inttypes.h>
 
@@ -72,6 +71,9 @@ MeterModbus::MeterModbus(std::list<Option> options)
 	} catch( vz::OptionNotFoundException &e ) {
 		_input_read = FALSE; /* use  modbus_read_registers by default*/
 	}
+	
+	_addressparams = optlist.lookup_addressparams(options, "addresses");
+	
 	
 	
 }

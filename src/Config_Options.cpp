@@ -178,7 +178,7 @@ void Config_Options::config_parse(
 	print(log_debug, "Have %d meters.", NULL, mappings.size());
 
 
-	//json_object_put(json_cfg); /* free allocated memory */
+	json_object_put(json_cfg); /* free allocated memory */
 }
 
 void Config_Options::config_parse_meter(MapContainer &mappings, Json::Ptr jso) {

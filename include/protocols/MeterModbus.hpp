@@ -27,6 +27,7 @@
 #define _MMODBUS_H_
 
 #include <protocols/Protocol.hpp>
+#include "Options.hpp"
 #include <modbus.h>
 
 enum modbus_datatype{ BOOL, WORD, SHORT, DWORD, LONG, FLOAT, ERROR};
@@ -51,6 +52,7 @@ public:
 	int _length;
 	bool _input_read;
 	bool _reset_connection;
+	const struct addressparam *_addressparams;
 };
 
 #endif /* _FILE_H_ */

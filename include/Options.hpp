@@ -5,15 +5,33 @@
 #include <iostream>
 #include <list>
 #include <json/json.h>
+#include <common.h>
+
+
+struct addressparam 
+{
+	unsigned char function_code;
+	unsigned int address;
+	const char *recalc_str;
+};
 
 class Option {
 
 public:
 	/* subset of json_type's */
-	typedef enum {
+	/*typedef enum {
 		type_boolean = 1,
 		type_double,
 		type_int,
+		type_string = 6
+	} type_t;*/
+	typedef enum {
+		type_null,
+		type_boolean = 1,
+		type_double,
+		type_int,
+		type_object,
+		type_array,
 		type_string = 6
 	} type_t;
 
@@ -30,6 +48,7 @@ public:
 	operator int() const;
 	operator double() const;
 	operator bool() const;
+	operator struct addressparam *() const;
 
 	const type_t type() const { return _type; }
 
@@ -54,12 +73,13 @@ private:
 	type_t _type;
 
 	std::string _value_string;
-
+	
 	union {
 		const char *string;
 		int integer;
 		double floating;
 		int boolean:1;
+		struct addressparam *addressparams;
 	} value;
 
 };
@@ -82,7 +102,7 @@ public:
 	const int    lookup_int(std::list<Option> options, const char *key);
 	const bool   lookup_bool(std::list<Option> options, const char *key);
 	const double lookup_double(std::list<Option> options, const char *key);
-
+	const struct addressparam *lookup_addressparams(std::list<Option> options, const char *key);
 	void dump(std::list<Option> options);
 
 	void parse();
