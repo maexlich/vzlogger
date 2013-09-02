@@ -57,13 +57,13 @@ MeterModbus::MeterModbus(std::list<Option> options)
 	_addressparams = (struct addressparam *)optlist.lookup_addressparams(options, "addresses");
 	struct addressparam *addressptr = _addressparams;
 	
-	while(addressptr->address != 0){
+	while(addressptr->function_code != 0xFF){
 		unsigned int length = strlen(addressptr->recalc_str);
 		char *str_mem;
 		str_mem = (char *)malloc(sizeof(char)*(length+1));
 		strncpy(str_mem, addressptr->recalc_str, length+1);
 		addressptr->recalc_str = str_mem;
-		print(log_debug, "Got Addressparam: %u, %s", name().c_str(),  addressptr->address, addressptr->recalc_str);
+		print(log_debug, "Got Addressparam: %u, %u, %s", name().c_str(), addressptr->function_code, addressptr->address, addressptr->recalc_str);
 		addressptr++;
 	}
 	
@@ -104,7 +104,7 @@ int MeterModbus::open() {
 
 int MeterModbus::close() {
 	struct addressparam *addressptr = _addressparams;
-	while(addressptr->address != 0){
+	while(addressptr->function_code != 0xFF){
 		free((void *)addressptr->recalc_str);
 	}
 	free((void *)_addressparams);
@@ -115,7 +115,7 @@ int MeterModbus::close() {
 }
 
 ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
-	uint16_t in = 0;
+	uint16_t in;
 	double out;
 	int rc;
 	const struct addressparam *current_address;
@@ -132,31 +132,24 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	}
 	current_address = _addressparams;
 	unsigned char highest_digit, power;
-	while((current_address->address != 0) && (max_readings > read_count)) {
+	while((current_address->function_code != 0xFF) && (max_readings > read_count)) {
 		getHighestDigit(current_address->address, &highest_digit, &power);
+		print(log_debug, "Got: higest: %u, power: %u, pow(10,power): %u","", highest_digit, power, (unsigned int)pow((double)10,(double)power));
 		switch(highest_digit){
 			case 4: // Holding Registers
-				print(log_debug, "Accessing Holding Register %u", name().c_str(), current_address->address-4*(unsigned int)pow((double)10,(double)power));
-				rc = modbus_read_registers(_mb, current_address->address-4*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
+				print(log_debug, "Accessing Register %u %u", "", power, current_address->address-4*pow(10,power));
+				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
 				break;
-				
 			case 3: // Input Registers
-				print(log_debug, "Accessing Input Register %u", name().c_str(), current_address->address-3*(unsigned int)pow((double)10,(double)power));
-				rc = modbus_read_input_registers(_mb, current_address->address-3*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
+				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
 				break;
-				
-			case READ_INPUT_STATUS:
-				print(log_debug, "Accessing Input Status register %u", name().c_str(), current_address->address-2*(unsigned int)pow((double)10,(double)power));
-				rc = modbus_read_input_bits(_mb, current_address->address-2*(unsigned int)pow((double)10,(double)power)-1, 1, (uint8_t *)&in);
-				break;
-				
 			case READ_COIL_STATUS:
-				print(log_debug, "Accessing Coil Status register %u", name().c_str(), current_address->address-1*(unsigned int)pow((double)10,(double)power));
-				rc = modbus_read_bits(_mb, current_address->address-1*(unsigned int)pow((double)10,(double)power)-1, 1, (uint8_t *)&in);
+			case READ_INPUT_STATUS:
+				break;
 		}
 		
 		if (rc == -1) {
-			print(log_error, "Unable to fetch data (ADR: %u): %i, %s", name().c_str(), current_address->address, errno, modbus_strerror(errno));
+			print(log_error, "Unable to fetch data (FC: %u, ADR: %u): %i, %s", name().c_str(), current_address->function_code, current_address->address, errno, modbus_strerror(errno));
 			if(errno == 104 || errno == 32){
 				close();
 				_reset_connection = true;
