@@ -87,15 +87,15 @@ void * reading_thread(void *arg) {
 				print(log_debug, "Updating interval to %i", mtr->name(), delta);
 				mtr->interval(delta);
 			}
-
 			/* insert readings into channel queues */
 			for(MeterMap::iterator ch = mapping->begin(); ch!=mapping->end(); ch++) {
 				Reading *add = NULL;
 
 				//print(log_debug, "Check channel %s, n=%d", mtr->name(), ch->name(), n);
-
+				
 				for (size_t i = 0; i < n; i++) {
-					if ( *rds[i].identifier().get() == *(*ch)->identifier().get()) {
+					if ( *rds[i].identifier().get() == *(*ch)->identifier().get() ) {
+
 						//print(log_debug, "found channel", mtr->name());
 						if ((*ch)->tvtod() < rds[i].tvtod()) {
 							(*ch)->last(&rds[i]);

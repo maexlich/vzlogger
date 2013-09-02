@@ -23,10 +23,10 @@
  Licence: This code is free for non-commercial use and may not be redistributed without permission. Contact me for exceptions. This code is provided as-is, with no warranty whatsoever.
 */
 
-#include<setjmp.h>
-#include<stdlib.h>
-#include<stdint.h>
-#include<stdbool.h>
+#include <setjmp.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /**
  @brief maximum length for tokens in characters for expressions, define this in the compiler options to change the maximum size
@@ -160,5 +160,5 @@ double parser_read_term( parser_data *pd );
  @return expression value
  */
 double parser_read_expr( parser_data *pd );
-	
+
 #endif

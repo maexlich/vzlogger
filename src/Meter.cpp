@@ -65,7 +65,7 @@ static const meter_details_t protocols[] = {
 	METER_DETAIL(sml, Sml,"Smart Message Language as used by EDL-21, eHz and SyM²", 32,false),
 #endif /* SML_SUPPORT */
 #ifdef MODBUS_SUPPORT
-	METER_DETAIL(modbus, Modbus, "Modbus", 1, true),
+	METER_DETAIL(modbus, Modbus, "Modbus", 100, true),
 #endif
 //{} /* stop condition for iterator */
 	METER_DETAIL(none, NULL,NULL, 0,false),

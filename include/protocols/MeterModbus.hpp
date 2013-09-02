@@ -30,7 +30,10 @@
 #include "Options.hpp"
 #include <modbus.h>
 
-enum modbus_datatype{ BOOL, WORD, SHORT, DWORD, LONG, FLOAT, ERROR};
+#define READ_COIL_STATUS 1
+#define READ_INPUT_STATUS 2
+#define READ_HOLDING_REGISTERS 3
+#define READ_INPUT_REGISTERS 4
 
 class MeterModbus : public vz::protocol::Protocol {
 
@@ -41,7 +44,6 @@ public:
 	int open();
 	int close();
 	ssize_t read(std::vector<Reading> &rds, size_t n);
-
 	const char *ip() { return _ip.c_str(); }
   
   private:
@@ -52,7 +54,8 @@ public:
 	int _length;
 	bool _input_read;
 	bool _reset_connection;
-	const struct addressparam *_addressparams;
+	struct addressparam *_addressparams;
+	void getHighestDigit(unsigned int number, unsigned char *digit, unsigned char *power);
 };
 
 #endif /* _FILE_H_ */

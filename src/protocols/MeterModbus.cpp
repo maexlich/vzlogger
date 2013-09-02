@@ -27,8 +27,10 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <math.h>
 
-#include "protocols/MeterModbus.hpp"
+#include <protocols/MeterModbus.hpp>
+#include <protocols/expression_parser.hpp>
 #include <VZException.hpp>
 #include <inttypes.h>
 
@@ -39,8 +41,6 @@ MeterModbus::MeterModbus(std::list<Option> options)
 		: Protocol("modbus")
 {
 	OptionList optlist;
-	modbus_datatype datatype;
-	
 	try {
 		_ip = optlist.lookup_string(options, "ip");
 	} catch( vz::VZException &e ) {
@@ -53,32 +53,35 @@ MeterModbus::MeterModbus(std::list<Option> options)
 		print(log_error, "Missing Port or invalid type", name().c_str());
 		_port = MODBUS_TCP_DEFAULT_PORT;
 	}
-	try {
-		_address = optlist.lookup_int(options, "address");
-	} catch( vz::VZException &e ) {
-		print(log_error, "Missing address or invalid type", name().c_str());
-		throw;
-	}
-	try {
-		_length = optlist.lookup_int(options, "length");
-	} catch( vz::VZException &e ) {
-		print(log_error, "Missing length or invalid type", name().c_str());
-		throw;
-	}
-	/* use  modbus_read_registers by default*/
-	try {
-		_input_read = optlist.lookup_bool(options, "input_read");
-	} catch( vz::OptionNotFoundException &e ) {
-		_input_read = FALSE; /* use  modbus_read_registers by default*/
-	}
 	
-	_addressparams = optlist.lookup_addressparams(options, "addresses");
+	_addressparams = (struct addressparam *)optlist.lookup_addressparams(options, "addresses");
+	struct addressparam *addressptr = _addressparams;
 	
+	while(addressptr->function_code != 0xFF){
+		unsigned int length = strlen(addressptr->recalc_str);
+		char *str_mem;
+		str_mem = (char *)malloc(sizeof(char)*(length+1));
+		strncpy(str_mem, addressptr->recalc_str, length+1);
+		addressptr->recalc_str = str_mem;
+		print(log_debug, "Got Addressparam: %u, %u, %s", name().c_str(), addressptr->function_code, addressptr->address, addressptr->recalc_str);
+		addressptr++;
+	}
 	
 	
 }
 
 MeterModbus::~MeterModbus() {
+}
+
+void MeterModbus::getHighestDigit(unsigned int number, unsigned char *digit, unsigned char *power){
+	*power = 0;
+	while (number!=0)
+	{
+		*digit = number % 10; 
+		(*power)++;
+		number /= 10;
+	}
+	(*power)--;
 }
 
 int MeterModbus::open() {
@@ -100,7 +103,12 @@ int MeterModbus::open() {
 }
 
 int MeterModbus::close() {
-
+	struct addressparam *addressptr = _addressparams;
+	while(addressptr->function_code != 0xFF){
+		free((void *)addressptr->recalc_str);
+	}
+	free((void *)_addressparams);
+	
 	modbus_close(_mb);
 	modbus_free(_mb);
 	return 0;
@@ -108,7 +116,10 @@ int MeterModbus::close() {
 
 ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	uint16_t in;
+	double out;
 	int rc;
+	const struct addressparam *current_address;
+	int read_count = 0;
 	
 	if(_reset_connection) {
 		int success;
@@ -119,20 +130,51 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 		else
 			return 0;
 	}
-	
-	rc = modbus_read_registers(_mb, _address-1, 1, &in);
-	if (rc == -1) {
-	    print(log_error, "Unable to fetch data: %i %s", name().c_str(), errno, modbus_strerror(errno));
-	    if(errno == 104 || errno == 32){
-			close();
-			_reset_connection = true;
+	current_address = _addressparams;
+	unsigned char highest_digit, power;
+	while((current_address->function_code != 0xFF) && (max_readings > read_count)) {
+		getHighestDigit(current_address->address, &highest_digit, &power);
+		print(log_debug, "Got: higest: %u, power: %u, pow(10,power): %u","", highest_digit, power, (unsigned int)pow((double)10,(double)power));
+		switch(highest_digit){
+			case 4: // Holding Registers
+				print(log_debug, "Accessing Register %u %u", "", power, current_address->address-4*pow(10,power));
+				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
+				break;
+			case 3: // Input Registers
+				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
+				break;
+			case READ_COIL_STATUS:
+			case READ_INPUT_STATUS:
+				break;
 		}
-	    return 0;
+		
+		if (rc == -1) {
+			print(log_error, "Unable to fetch data (FC: %u, ADR: %u): %i, %s", name().c_str(), current_address->function_code, current_address->address, errno, modbus_strerror(errno));
+			if(errno == 104 || errno == 32){
+				close();
+				_reset_connection = true;
+			}
+			return read_count;
+		}
+		print(log_debug, "Got %u via Modbus", "", in);
+		// TODO ERRORS possible if wrong format string input from config file
+		char *math_expression;
+		asprintf(&math_expression, current_address->recalc_str, in);
+		print(log_debug, "Calulating: %s --> %s", "", current_address->recalc_str, math_expression);
+		out = parse_expression(math_expression);
+		if(isnan(out)) {
+			print(log_error, "Unable to use value read from address %u. Error calculating: %s", name().c_str(), current_address->address, math_expression);
+		}
+		else {
+			rds[read_count].value(out);
+			rds[read_count].time();
+			rds[read_count].identifier(new AddressIdentifier(current_address->address));
+			read_count++;
+		}
+		free(math_expression);
+		current_address++;
 	}
 	
-	
-	rds[0].value((double)in);
-	rds[0].time();
-	rds[0].identifier(new AddressIdentifier(_address));
-	return 1;
+	return read_count;
 }
+

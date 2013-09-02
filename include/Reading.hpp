@@ -140,7 +140,8 @@ class AddressIdentifier : public ReadingIdentifier {
 public:
 	AddressIdentifier() {}
 	AddressIdentifier(unsigned int address) : _address(address) {}
-
+	AddressIdentifier(const char *string);
+	
 	void parse(const char *string);
 	size_t unparse(char *buffer, size_t n);
 	bool operator==(AddressIdentifier &cmp);

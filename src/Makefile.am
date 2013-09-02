@@ -38,7 +38,7 @@ vzlogger_LDFLAGS = -lpthread -lm -lstdc++ $(DEPS_VZ_LIBS)
 if MODBUS_SUPPORT
 vzlogger_SOURCES += \
 		protocols/MeterModbus.cpp \
-		protocols/expression_parser.c
+		protocols/expression_parser.cpp
 vzlogger_LDADD += $(DEPS_MODBUS_LIBS)
 AM_CPPFLAGS += $(DEPS_MODBUS_CFLAGS)
 endif

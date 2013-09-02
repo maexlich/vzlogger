@@ -126,7 +126,10 @@ ReadingIdentifier::Ptr reading_id_parse(meter_protocol_t protocol, const char *s
 			case meter_protocol_exec:
 				rid = ReadingIdentifier::Ptr(new StringIdentifier(string));
 				break;
-
+			case meter_protocol_modbus:
+				rid = ReadingIdentifier::Ptr(new AddressIdentifier(string));
+				break;
+				
 			default: /* ignore other protocols which do not provide id's */
 				rid = ReadingIdentifier::Ptr(new NilIdentifier());
 				break;
@@ -136,37 +139,8 @@ ReadingIdentifier::Ptr reading_id_parse(meter_protocol_t protocol, const char *s
 }
 
 // reading_id_unparse
-size_t Reading::unparse(
-//	meter_protocol_t protocol,
-	char *buffer, size_t n
-	) {
-
+size_t Reading::unparse(char *buffer, size_t n) {
 	return _identifier->unparse(buffer, n);
-
-#if 0
-	switch (protocol) {
-			case meter_protocol_d0:
-			case meter_protocol_sml:
-				//obis_unparse(id.obis, buffer, n);
-				break;
-
-			case meter_protocol_fluksov2:
-				//snprintf(buffer, n, "sensor%u/%s", abs(id.channel) - 1, (id.channel > 0) ? "power" : "consumption");
-				break;
-
-			case meter_protocol_file:
-			case meter_protocol_exec:
-				//if (id.string != NULL) {
-//		strncpy(buffer, id.string, n);
-//		break;
-				//}
-
-			default:
-				buffer[0] = '\0';
-	}
-
-	return strlen(buffer);
-#endif
 }
 
 bool ReadingIdentifier::operator==( ReadingIdentifier &cmp) {
@@ -174,21 +148,26 @@ bool ReadingIdentifier::operator==( ReadingIdentifier &cmp) {
 }
 
 bool ReadingIdentifier::compare( ReadingIdentifier *lhs,  ReadingIdentifier *rhs) {
-	if(ObisIdentifier* lhsx = dynamic_cast<ObisIdentifier*>(lhs)) {
-		if(ObisIdentifier* rhsx = dynamic_cast<ObisIdentifier*>(rhs)) {
+	if(AddressIdentifier* lhsx = dynamic_cast<AddressIdentifier*>(lhs)) {
+		if(AddressIdentifier* rhsx = dynamic_cast<AddressIdentifier*>(rhs)) {
 			return *lhsx == *rhsx;
 		} else { return -1; }
-	} else 
-		if( StringIdentifier* lhsx = dynamic_cast<StringIdentifier*>(rhs)) {
-			if(StringIdentifier* rhsx = dynamic_cast<StringIdentifier*>(lhs)) {
-				return lhsx == rhsx;
+	} else
+		if(ObisIdentifier* lhsx = dynamic_cast<ObisIdentifier*>(lhs)) {
+			if(ObisIdentifier* rhsx = dynamic_cast<ObisIdentifier*>(rhs)) {
+				return *lhsx == *rhsx;
 			} else { return -1; }
 		} else 
-			if(ChannelIdentifier* lhsx = dynamic_cast<ChannelIdentifier*>(lhs)) {
-				if(ChannelIdentifier* rhsx = dynamic_cast<ChannelIdentifier*>(rhs)) {
+			if( StringIdentifier* lhsx = dynamic_cast<StringIdentifier*>(rhs)) {
+				if(StringIdentifier* rhsx = dynamic_cast<StringIdentifier*>(lhs)) {
 					return lhsx == rhsx;
 				} else { return -1; }
-			}
+			} else 
+				if(ChannelIdentifier* lhsx = dynamic_cast<ChannelIdentifier*>(lhs)) {
+					if(ChannelIdentifier* rhsx = dynamic_cast<ChannelIdentifier*>(rhs)) {
+						return lhsx == rhsx;
+					} else { return -1; }
+				}
 	return -1;
 }
 
@@ -247,6 +226,10 @@ size_t ChannelIdentifier::unparse(char *buffer, size_t n) {
 }
 
 /* AddressIdentifier */
+AddressIdentifier::AddressIdentifier(const char *string) {
+	parse(string);
+}
+
 bool AddressIdentifier::operator==(AddressIdentifier &cmp) {
 	return (_address == cmp._address);
 }
@@ -254,7 +237,7 @@ bool AddressIdentifier::operator==(AddressIdentifier &cmp) {
 void AddressIdentifier::parse(const char *string) {
 	int ret;
 	unsigned int address;
-	ret = scanf("address%u",&address);
+	ret = sscanf(string, "address%u", &address);
 	if (ret != 1) {
 		throw vz::VZException("Failed to parse address identifier");
 	}

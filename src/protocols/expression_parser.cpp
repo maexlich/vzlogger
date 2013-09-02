@@ -1,12 +1,13 @@
-#include<math.h>
-#include<ctype.h>
-#include<stdio.h>
-#include<string.h>
-#include<stdint.h>
-#include<stdlib.h>
-#include<stdbool.h>
+#include <math.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
-#include"protocols/expression_parser.h"
+#include <common.h>
+#include <protocols/expression_parser.hpp>
 
 double parse_expression( const char *expr ){
 	double val;
@@ -15,8 +16,8 @@ double parse_expression( const char *expr ){
 	
 	// if pd->error is non-NULL, an error occured, print out the error string
 	if( pd->error ){
-		printf("Error: %s\n", pd->error );
-		printf("Expression failed to parse, returning nan\n" );
+		print(log_error,"Error: %s\n","Expression Parser", pd->error );
+		print(log_error,"Expression failed to parse, returning nan", "Expression Parser");
 	}
 	parser_data_free( pd );
 	return val;
@@ -33,7 +34,7 @@ double parser_parse( parser_data *pd ){
 }
 
 parser_data *parser_data_new( const char *str ){
-	parser_data *pd = malloc( sizeof( parser_data ) );
+	parser_data *pd = (parser_data *)malloc( sizeof( parser_data ) );
 	if( !pd ) return NULL;
 	pd->str = str;
 	pd->len = strlen( str )+1;
