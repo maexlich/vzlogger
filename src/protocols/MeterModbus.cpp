@@ -103,6 +103,7 @@ int MeterModbus::open() {
 }
 
 int MeterModbus::close() {
+	print(log_debug, "Freeing stuff...", "");
 	struct addressparam *addressptr = _addressparams;
 	while(addressptr->function_code != 0xFF){
 		free((void *)addressptr->recalc_str);
@@ -134,17 +135,22 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	unsigned char highest_digit, power;
 	while((current_address->function_code != 0xFF) && (max_readings > read_count)) {
 		getHighestDigit(current_address->address, &highest_digit, &power);
-		print(log_debug, "Got: higest: %u, power: %u, pow(10,power): %u","", highest_digit, power, (unsigned int)pow((double)10,(double)power));
-		switch(highest_digit){
-			case 4: // Holding Registers
-				print(log_debug, "Accessing Register %u %u", "", power, current_address->address-4*pow(10,power));
-				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
+		switch(current_address->function_code){
+			case READ_HOLDING_REGISTERS: // Holding Registers
+				print(log_debug, "Accessing Holding Register %u", name().c_str(), current_address->address);
+				rc = modbus_read_registers(_mb, current_address->address-4*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
 				break;
-			case 3: // Input Registers
-				rc = modbus_read_registers(_mb, current_address->address-1, 1, &in);
+			case READ_INPUT_REGISTERS: // Input Registers
+				print(log_debug, "Accessing Input Register %u", name().c_str(), current_address->address);
+				rc = modbus_read_input_registers(_mb, current_address->address-3*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
 				break;
 			case READ_COIL_STATUS:
+				print(log_debug, "Accessing Coil Status register %u", name().c_str(), current_address->address);
+				rc = modbus_read_bits(_mb, current_address->address, 1, (uint8_t *)&in);
+				break;
 			case READ_INPUT_STATUS:
+				print(log_debug, "Accessing Input Status register %u", name().c_str(), current_address->address);
+				rc = modbus_read_input_bits(_mb, current_address->address-2*(unsigned int)pow((double)10,(double)power)-1, 1, (uint8_t *)&in);
 				break;
 		}
 		
