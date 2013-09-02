@@ -59,13 +59,12 @@ Option::Option(const char *pKey, struct json_object *jso)
 				for(int i = 0; i< length; i++){
 					struct json_object *cur_val;
 					cur_val = json_object_array_get_idx(jso, i);
-					param_ptr->function_code = (unsigned char)json_object_get_int(json_object_array_get_idx(cur_val,0));
-					param_ptr->address = json_object_get_int(json_object_array_get_idx(cur_val,1));
-					param_ptr->recalc_str = json_object_get_string(json_object_array_get_idx(cur_val,2));
-					print(log_debug, "Added Function Code: %u, Address: %u, Recalc: %s", "Options", param_ptr->function_code, param_ptr->address, param_ptr->recalc_str);
+					param_ptr->address = json_object_get_int(json_object_array_get_idx(cur_val,0));
+					param_ptr->recalc_str = json_object_get_string(json_object_array_get_idx(cur_val,1));
+					print(log_debug, "Added Address: %u, Recalc: %s", "Options", param_ptr->address, param_ptr->recalc_str);
 					param_ptr++;
 				}
-				param_ptr->function_code = 0xFF;
+				param_ptr->address = 0;
 				value.addressparams = (struct addressparam *)mem_ptr;
 				break;
 			}

@@ -10,7 +10,6 @@
 
 struct addressparam 
 {
-	unsigned char function_code;
 	unsigned int address;
 	const char *recalc_str;
 };
