@@ -1,10 +1,10 @@
 /**
- * Read data from files & fifos
+ * Read data from modbus Servers via TCP/IP
  *
  * @package vzlogger
- * @copyright Copyright (c) 2011, The volkszaehler.org project
+ * @copyright Copyright (c) 2013, The volkszaehler.org project
  * @license http://www.gnu.org/licenses/gpl.txt GNU Public License
- * @author Steffen Vogel <info@steffenvogel.de>
+ * @author Max Horn <maexlich@gmail.com>
  */
 /*
  * This file is part of volkzaehler.org
