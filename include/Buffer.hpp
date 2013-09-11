@@ -69,7 +69,7 @@ class Buffer {
 
 	private:
 	std::list<Reading> _sent;
-	bool _newValues;
+	bool _newValues = false;
 
 	size_t _keep;	/**< number of readings to cache for local interface */
 

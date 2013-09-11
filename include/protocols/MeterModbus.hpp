@@ -53,7 +53,7 @@ public:
 	int _address;
 	int _length;
 	bool _input_read;
-	bool _reset_connection;
+	bool _reset_connection = true;
 	struct addressparam *_addressparams;
 	void getHighestDigit(unsigned int number, unsigned char *digit, unsigned char *power);
 };

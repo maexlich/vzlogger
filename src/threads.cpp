@@ -54,9 +54,8 @@ void * reading_thread(void *arg) {
 		Reading rd(mtr->identifier());
 		rds.push_back(rd);
 	}
-
-	//pthread_cleanup_push(&reading_thread_cleanup, rds);
-
+	
+	
 	print(log_debug, "Number of readers: %d", mtr->name(), details->max_readings);
 	print(log_debug, "Config.daemon: %d", mtr->name(), options.daemon());
 	print(log_debug, "Config.local: %d", mtr->name(), options.local());

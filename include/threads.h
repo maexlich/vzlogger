@@ -25,6 +25,7 @@
 
 #ifndef _THREADS_H_
 #define _THREADS_H_
+#include <pthread.h>
 
 void logging_thread_cleanup(void *arg);
 

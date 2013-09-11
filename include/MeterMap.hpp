@@ -91,7 +91,7 @@ private:
 	Meter::Ptr _meter;
 	std::vector<Channel::Ptr> _channels;
 
-	bool _thread_running;   /**< flag if thread is started */
+	bool _thread_running = false;   /**< flag if thread is started */
 	pthread_t _thread;      /**< Thread data for meter (reading) */
 };
 

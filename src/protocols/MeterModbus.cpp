@@ -54,13 +54,17 @@ MeterModbus::MeterModbus(std::list<Option> options)
 		_port = MODBUS_TCP_DEFAULT_PORT;
 	}
 	
-	_addressparams = (struct addressparam *)optlist.lookup_addressparams(options, "addresses");
-	struct addressparam *addressptr = _addressparams;
+	//Copy over the addressparams for clean memory management
+	struct addressparam *addresses = (struct addressparam *)optlist.lookup_addressparams(options, "addresses");
+	struct addressparam *addressptr = addresses;
+	_addressparams = addresses;
+	
+	//addressptr = _addressparams;
 	
 	while(addressptr->function_code != 0xFF){
 		unsigned int length = strlen(addressptr->recalc_str);
 		char *str_mem;
-		str_mem = (char *)malloc(sizeof(char)*(length+1));
+		str_mem = new char[length+1];
 		strncpy(str_mem, addressptr->recalc_str, length+1);
 		addressptr->recalc_str = str_mem;
 		print(log_debug, "Got Addressparam: %u, %u, %s", name().c_str(), addressptr->function_code, addressptr->address, addressptr->recalc_str);
@@ -71,6 +75,10 @@ MeterModbus::MeterModbus(std::list<Option> options)
 }
 
 MeterModbus::~MeterModbus() {
+	if(!_reset_connection){
+		modbus_close(_mb);
+		modbus_free(_mb);
+	}
 }
 
 void MeterModbus::getHighestDigit(unsigned int number, unsigned char *digit, unsigned char *power){
@@ -85,7 +93,7 @@ void MeterModbus::getHighestDigit(unsigned int number, unsigned char *digit, uns
 }
 
 int MeterModbus::open() {
-	
+	_mb = NULL;
 	_mb = modbus_new_tcp(ip(), _port);
 	
 	if (_mb == NULL) {
@@ -103,13 +111,13 @@ int MeterModbus::open() {
 }
 
 int MeterModbus::close() {
-	print(log_debug, "Freeing stuff...", "");
 	struct addressparam *addressptr = _addressparams;
 	while(addressptr->function_code != 0xFF){
-		free((void *)addressptr->recalc_str);
+		print(log_debug, "Freeing Address %p", "", addressptr->recalc_str);
+		delete[] addressptr->recalc_str;
+		addressptr++;
 	}
 	free((void *)_addressparams);
-	
 	modbus_close(_mb);
 	modbus_free(_mb);
 	return 0;

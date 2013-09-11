@@ -42,8 +42,7 @@ Option::Option(const char *pKey, struct json_object *jso)
 {
 //std::cout<< "New option...."<< pKey << std::endl;
 	int length;
-	void *mem_ptr;
-	struct addressparam *param_ptr;
+	struct addressparam *param_ptr, mem_ptr;
 	switch (json_object_get_type(jso)) {
 			case json_type_string:	_value_string = json_object_get_string(jso);   break;
 			case json_type_int:	    value.integer = json_object_get_int(jso);     break;
@@ -53,20 +52,21 @@ Option::Option(const char *pKey, struct json_object *jso)
 			if(!strcmp(pKey, "addresses"))
 			{
 				length = json_object_array_length(jso);
-				mem_ptr = malloc(sizeof(struct addressparam )*(length+1));
-				memset((void *)mem_ptr, 0, sizeof(struct addressparam)*(length+1));
-				param_ptr = (struct addressparam *)mem_ptr;
-				for(int i = 0; i< length; i++){
+				//mem_ptr = malloc(sizeof(struct addressparam )*(length+1));
+				//memset((void *)mem_ptr, 0, sizeof(struct addressparam)*(length+1));
+				//param_ptr = (struct addressparam *)mem_ptr;
+				param_ptr = new struct addressparam[length + 1];
+				int i;
+				for(i = 0; i< length; i++){
 					struct json_object *cur_val;
 					cur_val = json_object_array_get_idx(jso, i);
-					param_ptr->function_code = (unsigned char)json_object_get_int(json_object_array_get_idx(cur_val,0));
-					param_ptr->address = json_object_get_int(json_object_array_get_idx(cur_val,1));
-					param_ptr->recalc_str = json_object_get_string(json_object_array_get_idx(cur_val,2));
+					param_ptr[i].function_code = (unsigned char)json_object_get_int(json_object_array_get_idx(cur_val,0));
+					param_ptr[i].address = json_object_get_int(json_object_array_get_idx(cur_val,1));
+					param_ptr[i].recalc_str = json_object_get_string(json_object_array_get_idx(cur_val,2));
 					print(log_debug, "Added Function Code: %u, Address: %u, Recalc: %s", "Options", param_ptr->function_code, param_ptr->address, param_ptr->recalc_str);
-					param_ptr++;
 				}
-				param_ptr->function_code = 0xFF;
-				value.addressparams = (struct addressparam *)mem_ptr;
+				param_ptr[length].function_code = 0xFF;
+				value.addressparams = (struct addressparam *)param_ptr;
 				break;
 			}
 			

@@ -96,7 +96,6 @@ void MeterMap::cancel() {
 		pthread_cancel(_thread);
 		pthread_join(_thread, NULL);
 		_thread_running = false;
-
 		//_channels.clear();
 	}
 }

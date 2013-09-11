@@ -236,6 +236,7 @@ void daemonize() {
 void quit(int sig) {
 	//gStop = true;
 	mappings.quit(sig);
+	exit(1);
 }
 
 /**
