@@ -111,13 +111,13 @@ int MeterModbus::open() {
 }
 
 int MeterModbus::close() {
-	struct addressparam *addressptr = _addressparams;
+	/*struct addressparam *addressptr = _addressparams;
 	while(addressptr->function_code != 0xFF){
 		print(log_debug, "Freeing Address %p", "", addressptr->recalc_str);
 		delete[] addressptr->recalc_str;
 		addressptr++;
 	}
-	free((void *)_addressparams);
+	free((void *)_addressparams);*/
 	modbus_close(_mb);
 	modbus_free(_mb);
 	return 0;
@@ -144,11 +144,11 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 	while((current_address->function_code != 0xFF) && (max_readings > read_count)) {
 		getHighestDigit(current_address->address, &highest_digit, &power);
 		switch(current_address->function_code){
-			case READ_HOLDING_REGISTERS: // Holding Registers
+			case READ_HOLDING_REGISTERS:
 				print(log_debug, "Accessing Holding Register %u", name().c_str(), current_address->address);
 				rc = modbus_read_registers(_mb, current_address->address-4*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
 				break;
-			case READ_INPUT_REGISTERS: // Input Registers
+			case READ_INPUT_REGISTERS:
 				print(log_debug, "Accessing Input Register %u", name().c_str(), current_address->address);
 				rc = modbus_read_input_registers(_mb, current_address->address-3*(unsigned int)pow((double)10,(double)power)-1, 1, &in);
 				break;
@@ -162,14 +162,21 @@ ssize_t MeterModbus::read(std::vector<Reading> &rds, size_t max_readings) {
 				break;
 		}
 		
-		if (rc == -1) {
-			print(log_error, "Unable to fetch data (FC: %u, ADR: %u): %i, %s", name().c_str(), current_address->function_code, current_address->address, errno, modbus_strerror(errno));
+		if (rc == -1 && errno != 112345680) { //Except Illegal Data Address
+			print(log_error, "Unable to fetch data (FC: %u, ADR: %u): %s", name().c_str(), current_address->function_code, current_address->address, modbus_strerror(errno));
 			if(errno == 104 || errno == 32){
 				close();
 				_reset_connection = true;
 			}
 			return read_count;
 		}
+		
+		if(rc == -1 && errno == 112345680){
+			print(log_error, "Unable to fetch data (FC: %u, ADR: %u): %s", name().c_str(), current_address->function_code, current_address->address, modbus_strerror(errno));
+			current_address++;
+			continue;
+		}
+		
 		print(log_debug, "Got %u via Modbus", "", in);
 		// TODO ERRORS possible if wrong format string input from config file
 		char *math_expression;
