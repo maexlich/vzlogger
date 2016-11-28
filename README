@@ -1,3 +1,8 @@
+This is a fork of the original vzlogger with Modbus support for tracking variables of house controllers.
+It is adapted to a very specific use case and has been disconnected from the upstream vzlogger for a long time.
+Thus, it might be of use if somebody wants to implement something similar in the current version of vzlogger,
+but should not be used in production.
+
 vzlogger...
   * is a tool to read and log measurements of a wide variety of smartmeters, sensors to the volkszaehler.org middleware.
   * can run as a daemon or via Cron.
